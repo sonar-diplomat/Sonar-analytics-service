@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+  push:
+    branches:
+      - '**'
+      - '!main'
+      - '!master'
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  SOLUTION_FILE: 'AnalyticsService.slnx'
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Cache .NET build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj', '**/*.slnx', '**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
+      - name: Display .NET version
+        run: dotnet --version
+
+      - name: Verify solution file exists
+        run: |
+          if [ ! -f "${{ env.SOLUTION_FILE }}" ]; then
+            echo "❌ Solution file ${{ env.SOLUTION_FILE }} not found"
+            exit 1
+          fi
+          echo "✅ Using ${{ env.SOLUTION_FILE }}"
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+      - name: Build solution
+        run: dotnet build ${{ env.SOLUTION_FILE }} --no-restore --configuration Release --verbosity minimal
+        continue-on-error: false
+
+      - name: Verify build output
+        if: success()
+        run: |
+          echo "✅ Build completed successfully"
+          echo ""
+          echo "📦 Built assemblies:"
+          find . -name "*.dll" -path "*/bin/Release/*" -not -path "*/obj/*" | while read file; do
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "unknown")
+            echo "  ✓ $(basename "$file") ($size bytes)"
+          done
+          echo ""
+          echo "📊 Project count:"
+          dotnet sln ${{ env.SOLUTION_FILE }} list | grep -c "\.csproj" || echo "0"
+          
+      - name: Build failure notification
+        if: failure()
+        run: |
+          echo "❌ Build failed!"
+          echo "Please check the build logs above for errors."
+          exit 1
+
