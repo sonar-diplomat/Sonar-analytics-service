@@ -20,11 +20,11 @@ public class AnalyticsGrpcService : Analytics.AnalyticsBase
     public override async Task<AddUserEventResponse> AddUserEvent(UserEventRequest request, ServerCallContext context)
     {
         var command = new AddUserEventCommand(
-            Guid.Parse(request.UserId),
-            ParseGuidOrNull(request.TrackId),
+            request.UserId,
+            request.TrackId == 0 ? null : request.TrackId,
             MapEventType(request.EventType),
             MapContextType(request.ContextType),
-            ParseGuidOrNull(request.ContextId),
+            request.ContextId == 0 ? null : request.ContextId,
             request.PositionMs == 0 ? null : checked((int)request.PositionMs),
             request.DurationMs == 0 ? null : checked((int)request.DurationMs),
             request.Timestamp.ToDateTime().ToUniversalTime(),
@@ -57,8 +57,5 @@ public class AnalyticsGrpcService : Analytics.AnalyticsBase
             API.ContextType.ContextSearch => Domain.ContextType.ContextSearch,
             _ => Domain.ContextType.ContextUnknown
         };
-
-    private static Guid? ParseGuidOrNull(string value) =>
-        Guid.TryParse(value, out var guid) ? guid : null;
 }
 

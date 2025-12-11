@@ -3,11 +3,11 @@ using Analytics.Domain;
 namespace Analytics.Application.UserEvents;
 
 public record AddUserEventCommand(
-    Guid UserId,
-    Guid? TrackId,
+    int UserId,
+    int? TrackId,
     EventType EventType,
     ContextType ContextType,
-    Guid? ContextId,
+    int? ContextId,
     int? PositionMs,
     int? DurationMs,
     DateTime TimestampUtc,
