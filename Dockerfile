@@ -4,10 +4,13 @@ EXPOSE 5000
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY ["AnalyticsService/AnalyticsService.csproj", "AnalyticsService/"]
-RUN dotnet restore "AnalyticsService/AnalyticsService.csproj"
+COPY ["Analytics.API/Analytics.API.csproj", "Analytics.API/"]
+COPY ["Analytics.Application/Analytics.Application.csproj", "Analytics.Application/"]
+COPY ["Analytics.Domain/Analytics.Domain.csproj", "Analytics.Domain/"]
+COPY ["Analytics.Infrastructure/Analytics.Infrastructure.csproj", "Analytics.Infrastructure/"]
+RUN dotnet restore "Analytics.API/Analytics.API.csproj"
 COPY . .
-WORKDIR "/src/AnalyticsService"
+WORKDIR "/src/Analytics.API"
 RUN dotnet build -c Release -o /app/build
 
 FROM build AS publish
@@ -17,4 +20,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV ASPNETCORE_URLS=http://+:5000
-ENTRYPOINT ["dotnet", "AnalyticsService.dll"]
+ENTRYPOINT ["dotnet", "Analytics.API.dll"]
