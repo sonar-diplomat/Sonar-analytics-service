@@ -3,8 +3,8 @@ using Analytics.Domain;
 namespace Analytics.Application.Recommendations;
 
 public record RecentTrackResult(
-    Guid TrackId,
-    Guid? ContextId,
+    int TrackId,
+    int? ContextId,
     ContextType ContextType,
     DateTime LastPlayedAtUtc);
 

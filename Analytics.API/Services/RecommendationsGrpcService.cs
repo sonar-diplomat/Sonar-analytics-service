@@ -33,7 +33,7 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
         var response = new GetPopularCollectionsResponse();
         response.Collections.AddRange(results.Select(r => new PopularCollection
         {
-            CollectionId = r.CollectionId.ToString(),
+            CollectionId = r.CollectionId,
             CollectionType = MapCollectionType(r.CollectionType),
             Score = r.Score,
             Plays = r.Plays,
@@ -48,16 +48,11 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
         GetRecentCollectionsRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "user_id is invalid GUID"));
-        }
-
         var limit = request.Limit <= 0 ? 5 : request.Limit;
         limit = Math.Min(limit, 50);
 
         var results = await _recentCollectionsHandler.HandleAsync(
-            new GetRecentCollectionsQuery(userId, limit, request.Cursor),
+            new GetRecentCollectionsQuery(request.UserId, limit, request.Cursor),
             context.CancellationToken);
 
         var hasMore = results.Count > limit;
@@ -66,7 +61,7 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
         var response = new GetRecentCollectionsResponse();
         response.Collections.AddRange(page.Select(r => new RecentCollection
         {
-            CollectionId = r.CollectionId.ToString(),
+            CollectionId = r.CollectionId,
             CollectionType = MapCollectionType(r.CollectionType),
             LastPlayedAt = Timestamp.FromDateTime(DateTime.SpecifyKind(r.LastPlayedAtUtc, DateTimeKind.Utc))
         }));
@@ -84,16 +79,11 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
         GetRecentTracksRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "user_id is invalid GUID"));
-        }
-
         var limit = request.Limit <= 0 ? 5 : request.Limit;
         limit = Math.Min(limit, 50);
 
         var results = await _recentTracksHandler.HandleAsync(
-            new GetRecentTracksQuery(userId, limit, request.Cursor),
+            new GetRecentTracksQuery(request.UserId, limit, request.Cursor),
             context.CancellationToken);
 
         var hasMore = results.Count > limit;
@@ -102,9 +92,9 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
         var response = new GetRecentTracksResponse();
         response.Tracks.AddRange(page.Select(r => new RecentTrack
         {
-            TrackId = r.TrackId.ToString(),
+            TrackId = r.TrackId,
             LastPlayedAt = Timestamp.FromDateTime(DateTime.SpecifyKind(r.LastPlayedAtUtc, DateTimeKind.Utc)),
-            ContextId = r.ContextId?.ToString() ?? string.Empty,
+            ContextId = r.ContextId ?? 0,
             ContextType = MapContextType(r.ContextType)
         }));
 

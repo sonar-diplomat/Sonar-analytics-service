@@ -3,7 +3,7 @@ using Analytics.Domain;
 namespace Analytics.Application.Recommendations;
 
 public record PopularCollectionResult(
-    Guid CollectionId,
+    int CollectionId,
     ContextType CollectionType,
     long Plays,
     long Likes,

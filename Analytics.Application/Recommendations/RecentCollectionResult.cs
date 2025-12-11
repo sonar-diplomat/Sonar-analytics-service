@@ -3,7 +3,7 @@ using Analytics.Domain;
 namespace Analytics.Application.Recommendations;
 
 public record RecentCollectionResult(
-    Guid CollectionId,
+    int CollectionId,
     ContextType CollectionType,
     DateTime LastPlayedAtUtc);
 

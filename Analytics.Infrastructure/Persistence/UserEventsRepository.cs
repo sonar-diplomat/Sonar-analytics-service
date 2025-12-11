@@ -59,10 +59,10 @@ public class UserEventsRepository : IUserEventsRepository
     }
 
     public async Task<IReadOnlyList<RecentCollectionResult>> GetRecentCollectionsAsync(
-        Guid userId,
+        int userId,
         int limit,
         DateTime? cursorLastPlayedUtc,
-        Guid? cursorCollectionId,
+        int? cursorCollectionId,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.UserEvents
@@ -86,7 +86,7 @@ public class UserEventsRepository : IUserEventsRepository
         {
             grouped = grouped.Where(x =>
                 x.LastPlayedAtUtc < cursorLastPlayedUtc.Value ||
-                (x.LastPlayedAtUtc == cursorLastPlayedUtc.Value && x.ContextId!.Value.CompareTo(cursorCollectionId.Value) < 0));
+                (x.LastPlayedAtUtc == cursorLastPlayedUtc.Value && x.ContextId!.Value < cursorCollectionId.Value));
         }
 
         var result = await grouped
@@ -103,10 +103,10 @@ public class UserEventsRepository : IUserEventsRepository
     }
 
     public async Task<IReadOnlyList<RecentTrackResult>> GetRecentTracksAsync(
-        Guid userId,
+        int userId,
         int limit,
         DateTime? cursorLastPlayedUtc,
-        Guid? cursorTrackId,
+        int? cursorTrackId,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.UserEvents
@@ -128,7 +128,7 @@ public class UserEventsRepository : IUserEventsRepository
         {
             perTrack = perTrack.Where(x =>
                 x.LastEvent.TimestampUtc < cursorLastPlayedUtc.Value ||
-                (x.LastEvent.TimestampUtc == cursorLastPlayedUtc.Value && x.TrackId!.Value.CompareTo(cursorTrackId.Value) < 0));
+                (x.LastEvent.TimestampUtc == cursorLastPlayedUtc.Value && x.TrackId!.Value < cursorTrackId.Value));
         }
 
         var result = await perTrack

@@ -7,7 +7,7 @@ public static class CursorHelper
 {
     private const char Separator = '|';
 
-    public static bool TryDecode(string? cursor, out DateTime lastPlayedUtc, out Guid id)
+    public static bool TryDecode(string? cursor, out DateTime lastPlayedUtc, out int id)
     {
         lastPlayedUtc = default;
         id = default;
@@ -32,14 +32,14 @@ public static class CursorHelper
         if (!long.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var ticks))
             return false;
 
-        if (!Guid.TryParse(parts[1], out id))
+        if (!int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out id))
             return false;
 
         lastPlayedUtc = new DateTime(ticks, DateTimeKind.Utc);
         return true;
     }
 
-    public static string Encode(DateTime lastPlayedUtc, Guid id)
+    public static string Encode(DateTime lastPlayedUtc, int id)
     {
         var payload = string.Create(CultureInfo.InvariantCulture, $"{lastPlayedUtc.Ticks}{Separator}{id}");
         return Convert.ToBase64String(Encoding.UTF8.GetBytes(payload));

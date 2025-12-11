@@ -1,5 +1,5 @@
 namespace Analytics.Application.Recommendations;
 
-public record GetRecentCollectionsQuery(Guid UserId, int Limit, string? Cursor);
+public record GetRecentCollectionsQuery(int UserId, int Limit, string? Cursor);
 
 

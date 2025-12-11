@@ -17,7 +17,7 @@ message GetPopularCollectionsRequest {
 }
 
 message PopularCollection {
-  string collection_id = 1;
+  int32 collection_id = 1;
   CollectionType collection_type = 2;
   double score = 3;
   int64 plays = 4;
@@ -30,7 +30,7 @@ message GetPopularCollectionsResponse {
 }
 
 message GetRecentCollectionsRequest {
-  string user_id = 1;
+  int32 user_id = 1;
   // Optional limit; defaults to 5 when not provided or <= 0.
   int32 limit = 2;
   // Opaque cursor for pagination; server returns next_cursor when more data.
@@ -38,7 +38,7 @@ message GetRecentCollectionsRequest {
 }
 
 message RecentCollection {
-  string collection_id = 1;
+  int32 collection_id = 1;
   CollectionType collection_type = 2;
   google.protobuf.Timestamp last_played_at = 3;
 }
@@ -49,7 +49,7 @@ message GetRecentCollectionsResponse {
 }
 
 message GetRecentTracksRequest {
-  string user_id = 1;
+  int32 user_id = 1;
   // Optional limit; defaults to 5 when not provided or <= 0.
   int32 limit = 2;
   // Opaque cursor for pagination; server returns next_cursor when more data.
@@ -57,9 +57,9 @@ message GetRecentTracksRequest {
 }
 
 message RecentTrack {
-  string track_id = 1;
+  int32 track_id = 1;
   google.protobuf.Timestamp last_played_at = 2;
-  string context_id = 3;
+  int32 context_id = 3;
   ContextType context_type = 4;
 }
 

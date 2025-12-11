@@ -15,17 +15,17 @@ public interface IUserEventsRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<RecentCollectionResult>> GetRecentCollectionsAsync(
-        Guid userId,
+        int userId,
         int limit,
         DateTime? cursorLastPlayedUtc,
-        Guid? cursorCollectionId,
+        int? cursorCollectionId,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<RecentTrackResult>> GetRecentTracksAsync(
-        Guid userId,
+        int userId,
         int limit,
         DateTime? cursorLastPlayedUtc,
-        Guid? cursorTrackId,
+        int? cursorTrackId,
         CancellationToken cancellationToken = default);
 }
 

@@ -19,7 +19,7 @@ public class GetRecentTracksHandler
         limit = Math.Min(limit, 50);
 
         DateTime? cursorTs = null;
-        Guid? cursorId = null;
+        int? cursorId = null;
         if (CursorHelper.TryDecode(query.Cursor, out var ts, out var id))
         {
             cursorTs = ts;
