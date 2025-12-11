@@ -11,6 +11,7 @@ builder.Services.AddGrpc();
 var app = builder.Build();
 
 app.MapGrpcService<AnalyticsGrpcService>();
+app.MapGrpcService<RecommendationsGrpcService>();
 app.MapGet("/", () => "AnalyticsService gRPC is running.");
 
 app.Run();

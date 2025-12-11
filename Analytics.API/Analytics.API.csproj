@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\analytics.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\recommendations.proto" GrpcServices="Server" AdditionalImportDirs="Protos" />
   </ItemGroup>
 
   <ItemGroup>
