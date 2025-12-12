@@ -1,4 +1,3 @@
-using Analytics.API;
 using Analytics.Application.Recommendations;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -115,15 +114,15 @@ public class RecommendationsGrpcService : Recommendations.RecommendationsBase
             _ => CollectionType.CollectionUnknown
         };
 
-    private static API.ContextType MapContextType(DomainContextType domain) =>
+    private static ContextType MapContextType(DomainContextType domain) =>
         domain switch
         {
-            DomainContextType.ContextTrack => API.ContextType.ContextTrack,
-            DomainContextType.ContextPlaylist => API.ContextType.ContextPlaylist,
-            DomainContextType.ContextAlbum => API.ContextType.ContextAlbum,
-            DomainContextType.ContextRadio => API.ContextType.ContextRadio,
-            DomainContextType.ContextSearch => API.ContextType.ContextSearch,
-            _ => API.ContextType.ContextUnknown
+            DomainContextType.ContextTrack => ContextType.ContextTrack,
+            DomainContextType.ContextPlaylist => ContextType.ContextPlaylist,
+            DomainContextType.ContextAlbum => ContextType.ContextAlbum,
+            DomainContextType.ContextRadio => ContextType.ContextRadio,
+            DomainContextType.ContextSearch => ContextType.ContextSearch,
+            _ => ContextType.ContextUnknown
         };
 }
 

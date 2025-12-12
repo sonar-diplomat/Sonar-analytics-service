@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<GetPopularCollectionsHandler>();
         services.AddScoped<GetRecentCollectionsHandler>();
         services.AddScoped<GetRecentTracksHandler>();
+        services.AddScoped<GetTopTracksHandler>();
         return services;
     }
 }

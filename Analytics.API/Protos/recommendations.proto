@@ -68,6 +68,21 @@ message GetRecentTracksResponse {
   string next_cursor = 2;
 }
 
+message GetTopTracksRequest {
+  int32 user_id = 1;
+  // Optional limit; defaults to 10 when not provided or <= 0. Max is 100.
+  int32 limit = 2;
+}
+
+message TopTrack {
+  int32 track_id = 1;
+  int64 play_count = 2;
+}
+
+message GetTopTracksResponse {
+  repeated TopTrack tracks = 1;
+}
+
 enum CollectionType {
   COLLECTION_UNKNOWN = 0;
   COLLECTION_ALBUM = 1;

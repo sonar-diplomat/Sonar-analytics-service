@@ -27,5 +27,10 @@ public interface IUserEventsRepository
         DateTime? cursorLastPlayedUtc,
         int? cursorTrackId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TopTrackResult>> GetTopTracksAsync(
+        int userId,
+        int limit,
+        CancellationToken cancellationToken = default);
 }
 

@@ -204,5 +204,40 @@ public class UserEventsRepository : IUserEventsRepository
 
         return result;
     }
+
+    public async Task<IReadOnlyList<TopTrackResult>> GetTopTracksAsync(
+        int userId,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.UserEvents
+            .AsNoTracking()
+            .Where(e =>
+                e.UserId == userId &&
+                e.TrackId != null &&
+                e.TrackId > 0 &&
+                e.EventType == EventType.PlayStart);
+
+        var grouped = query
+            .GroupBy(e => e.TrackId)
+            .Select(g => new
+            {
+                TrackId = g.Key,
+                PlayCount = g.LongCount()
+            })
+            .OrderByDescending(x => x.PlayCount)
+            .ThenByDescending(x => x.TrackId)
+            .Take(limit);
+
+        var result = await grouped
+            .Select(x => new TopTrackResult
+            {
+                TrackId = x.TrackId!.Value,
+                PlayCount = x.PlayCount
+            })
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
 }
 
