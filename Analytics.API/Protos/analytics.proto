@@ -6,6 +6,8 @@ import "google/protobuf/timestamp.proto";
 
 service Analytics {
   rpc AddUserEvent (UserEventRequest) returns (AddUserEventResponse);
+  rpc GetTopTracks (GetTopTracksRequest) returns (GetTopTracksResponse);
+  rpc GetTopArtists (GetTopArtistsRequest) returns (GetTopArtistsResponse);
 }
 
 message UserEventRequest {
@@ -41,5 +43,33 @@ enum ContextType {
   CONTEXT_ALBUM = 3;
   CONTEXT_RADIO = 4;
   CONTEXT_SEARCH = 5;
+}
+
+message GetTopTracksRequest {
+  int32 user_id = 1;  // ID пользователя (обязательно)
+  int32 limit = 2;    // Количество треков (обычно 5)
+}
+
+message GetTopTracksResponse {
+  repeated TopTrack tracks = 1;  // Список треков, отсортированный по play_count (по убыванию)
+}
+
+message TopTrack {
+  int32 track_id = 1;    // ID трека
+  int64 play_count = 2;  // Количество прослушиваний
+}
+
+message GetTopArtistsRequest {
+  int32 user_id = 1;  // ID пользователя (обязательно)
+  int32 limit = 2;    // Количество артистов (обычно 5)
+}
+
+message GetTopArtistsResponse {
+  repeated TopArtist artists = 1;  // Список артистов, отсортированный по play_count (по убыванию)
+}
+
+message TopArtist {
+  int32 artist_id = 1;  // ID артиста
+  int64 play_count = 2; // Общее количество прослушиваний всех треков артиста
 }
 

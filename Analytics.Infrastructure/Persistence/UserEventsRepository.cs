@@ -1,7 +1,9 @@
 using Analytics.Application.Abstractions;
 using Analytics.Application.Recommendations;
+using Analytics.Application.UserEvents;
 using Analytics.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Analytics.Infrastructure.Persistence;
 
@@ -230,14 +232,96 @@ public class UserEventsRepository : IUserEventsRepository
             .Take(limit);
 
         var result = await grouped
-            .Select(x => new TopTrackResult
-            {
-                TrackId = x.TrackId!.Value,
-                PlayCount = x.PlayCount
-            })
+            .Select(x => new TopTrackResult(
+                x.TrackId!.Value,
+                x.PlayCount))
             .ToListAsync(cancellationToken);
 
         return result;
+    }
+
+    public async Task<IReadOnlyList<TopArtistResult>> GetTopArtistsAsync(
+        int userId,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        // Get all PlayStart events with TrackId for this user
+        var events = await _dbContext.UserEvents
+            .AsNoTracking()
+            .Where(e =>
+                e.UserId == userId &&
+                e.TrackId != null &&
+                e.TrackId > 0 &&
+                e.EventType == EventType.PlayStart)
+            .ToListAsync(cancellationToken);
+
+        // Group by artist_id from payload
+        // Note: This implementation assumes artist_id is stored in payload JSON
+        // Format: {"artist_id": 123} or {"artist_ids": [123, 456]} for multiple artists
+        var artistPlayCounts = new Dictionary<int, long>();
+
+        foreach (var evt in events)
+        {
+            var artistIds = ExtractArtistIdsFromPayload(evt.PayloadJson);
+            foreach (var artistId in artistIds)
+            {
+                if (!artistPlayCounts.ContainsKey(artistId))
+                {
+                    artistPlayCounts[artistId] = 0;
+                }
+                artistPlayCounts[artistId]++;
+            }
+        }
+
+        var result = artistPlayCounts
+            .OrderByDescending(x => x.Value)
+            .ThenByDescending(x => x.Key)
+            .Take(limit)
+            .Select(x => new TopArtistResult(x.Key, x.Value))
+            .ToList();
+
+        return result;
+    }
+
+    private static List<int> ExtractArtistIdsFromPayload(string? payload)
+    {
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            return new List<int>();
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(payload);
+            var root = doc.RootElement;
+
+            // Try to get artist_id (single artist)
+            if (root.TryGetProperty("artist_id", out var artistIdElement))
+            {
+                if (artistIdElement.ValueKind == JsonValueKind.Number)
+                {
+                    return new List<int> { artistIdElement.GetInt32() };
+                }
+            }
+
+            // Try to get artist_ids (array of artists)
+            if (root.TryGetProperty("artist_ids", out var artistIdsElement))
+            {
+                if (artistIdsElement.ValueKind == JsonValueKind.Array)
+                {
+                    return artistIdsElement.EnumerateArray()
+                        .Where(e => e.ValueKind == JsonValueKind.Number)
+                        .Select(e => e.GetInt32())
+                        .ToList();
+                }
+            }
+        }
+        catch
+        {
+            // If JSON parsing fails, return empty list
+        }
+
+        return new List<int>();
     }
 }
 

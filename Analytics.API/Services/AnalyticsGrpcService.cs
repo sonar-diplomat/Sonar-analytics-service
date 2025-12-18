@@ -1,7 +1,4 @@
-using Analytics.API;
 using Analytics.Application.UserEvents;
-using Analytics.Domain;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
 namespace Analytics.API.Services;
@@ -9,11 +6,19 @@ namespace Analytics.API.Services;
 public class AnalyticsGrpcService : Analytics.AnalyticsBase
 {
     private readonly AddUserEventHandler _handler;
+    private readonly Application.UserEvents.GetTopTracksHandler _topTracksHandler;
+    private readonly GetTopArtistsHandler _topArtistsHandler;
     private readonly ILogger<AnalyticsGrpcService> _logger;
 
-    public AnalyticsGrpcService(AddUserEventHandler handler, ILogger<AnalyticsGrpcService> logger)
+    public AnalyticsGrpcService(
+        AddUserEventHandler handler,
+        Application.UserEvents.GetTopTracksHandler topTracksHandler,
+        GetTopArtistsHandler topArtistsHandler,
+        ILogger<AnalyticsGrpcService> logger)
     {
         _handler = handler;
+        _topTracksHandler = topTracksHandler;
+        _topArtistsHandler = topArtistsHandler;
         _logger = logger;
     }
 
@@ -46,6 +51,46 @@ public class AnalyticsGrpcService : Analytics.AnalyticsBase
             API.EventType.Search => Domain.EventType.Search,
             _ => Domain.EventType.EventUnknown
         };
+
+    public override async Task<GetTopTracksResponse> GetTopTracks(
+        GetTopTracksRequest request,
+        ServerCallContext context)
+    {
+        var limit = request.Limit <= 0 ? 5 : request.Limit;
+
+        var results = await _topTracksHandler.HandleAsync(
+            new GetTopTracksQuery(request.UserId, limit),
+            context.CancellationToken);
+
+        var response = new GetTopTracksResponse();
+        response.Tracks.AddRange(results.Select(r => new TopTrack
+        {
+            TrackId = r.TrackId,
+            PlayCount = r.PlayCount
+        }));
+
+        return response;
+    }
+
+    public override async Task<GetTopArtistsResponse> GetTopArtists(
+        GetTopArtistsRequest request,
+        ServerCallContext context)
+    {
+        var limit = request.Limit <= 0 ? 5 : request.Limit;
+
+        var results = await _topArtistsHandler.HandleAsync(
+            new GetTopArtistsQuery(request.UserId, limit),
+            context.CancellationToken);
+
+        var response = new GetTopArtistsResponse();
+        response.Artists.AddRange(results.Select(r => new TopArtist
+        {
+            ArtistId = r.ArtistId,
+            PlayCount = r.PlayCount
+        }));
+
+        return response;
+    }
 
     private static Domain.ContextType MapContextType(API.ContextType proto) =>
         proto switch

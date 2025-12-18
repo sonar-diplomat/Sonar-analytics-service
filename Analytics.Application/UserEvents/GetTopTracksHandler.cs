@@ -1,6 +1,6 @@
 using Analytics.Application.Abstractions;
 
-namespace Analytics.Application.Recommendations;
+namespace Analytics.Application.UserEvents;
 
 public class GetTopTracksHandler
 {
@@ -15,9 +15,7 @@ public class GetTopTracksHandler
         GetTopTracksQuery query,
         CancellationToken cancellationToken = default)
     {
-        var limit = query.Limit <= 0 ? 10 : query.Limit;
-        limit = Math.Min(limit, 100);
-
+        var limit = query.Limit <= 0 ? 5 : query.Limit;
         return _repository.GetTopTracksAsync(query.UserId, limit, cancellationToken);
     }
 }

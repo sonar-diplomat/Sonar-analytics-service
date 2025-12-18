@@ -1,5 +1,7 @@
 using Analytics.Application.Recommendations;
+using Analytics.Application.UserEvents;
 using Analytics.Domain;
+using TopTrackResult = Analytics.Application.UserEvents.TopTrackResult;
 
 namespace Analytics.Application.Abstractions;
 
@@ -29,6 +31,11 @@ public interface IUserEventsRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<TopTrackResult>> GetTopTracksAsync(
+        int userId,
+        int limit,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TopArtistResult>> GetTopArtistsAsync(
         int userId,
         int limit,
         CancellationToken cancellationToken = default);
